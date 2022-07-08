@@ -17,11 +17,14 @@
     <!-- FontAwesome -->
     <link rel="stylesheet" href="{% static 'css/fontawesome.all.min.css' %}">
 
-    <title>Welcome to Braniac!</title>
+    <title>
+        {% block title %}
+        Welcome to Braniac!
+        {% endblock title %}
+    </title>
 </head>
 
 <body>
-
 
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
