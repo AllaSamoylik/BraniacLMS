@@ -1,18 +1,22 @@
 {% extends 'mainapp/base.html' %}
+
+{% block title %}
+    Новости
+{% endblock title %}
+
 {% block content %}
     {% with range as range %}
-
 
         <div class="row">
 
             <div class="col-lg-8">
-                {% for news_count in range %}
+                {% for news_item in object_list %}
                     <div class="card my-2">
                         <div class="card-body">
-                            <h5 class="card-title">{{ title }}</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">{{ date|date:'d.m.Y' }}</h6>
-                            <p class="card-text">{{ preview }}</p>
-                            <a href="#" class="card-link">Подробнее</a>
+                            <h5 class="card-title">{{ news_item.title }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ news_item.created|date:'d.m.Y' }}</h6>
+                            <p class="card-text">{{ news_item.preamble }}</p>
+                            <a href="{% url 'mainapp:news_detail' pk=news_item.pk %}" class="card-link">Подробнее</a>
                         </div>
                     </div>
                 {% endfor %}

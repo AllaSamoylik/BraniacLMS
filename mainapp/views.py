@@ -1,5 +1,7 @@
 from django.views.generic import TemplateView
-from datetime import datetime
+from django.shortcuts import get_object_or_404
+
+from mainapp.models import *
 
 
 class ContactsView(TemplateView):
@@ -30,8 +32,25 @@ class ContactsView(TemplateView):
         ]
         return context
 
+
 class CoursesListView(TemplateView):
     template_name = 'mainapp/courses_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(CoursesListView, self).get_context_data(**kwargs)
+        context['objects'] = Course.objects.all()[:7]
+        return context
+
+
+class CoursesDetailView(TemplateView):
+    template_name = 'mainapp/courses_detail.html'
+
+    def get_context_data(self, pk=None, **kwargs):
+        context = super(CoursesDetailView, self).get_context_data(**kwargs)
+        context['course_object'] = get_object_or_404(Course, pk=pk)
+        context['lessons'] = Lesson.objects.filter(course=context['course_object'])
+        context['teachers'] = CoursesTeacher.objects.filter(courses=context['course_object'])
+        return context
 
 
 class DocSiteView(TemplateView):
@@ -51,34 +70,16 @@ class NewsView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Заголовок новости'
-        context['preview'] = 'Описание к новости'
-        context['date'] = datetime.now()
-        context['range'] = range(5)
-        #
-        # context['object_list'] = [
-        #     {
-        #         'title': 'Новость',
-        #         'preview': 'Описание к новости',
-        #         'date': '2022-07-04'
-        #     }, {
-        #         'title': 'Новость',
-        #         'preview': 'Описание к новости',
-        #         'date': '2022-07-04'
-        #     }, {
-        #         'title': 'Новость',
-        #         'preview': 'Описание к новости',
-        #         'date': '2022-07-04'
-        #     }, {
-        #         'title': 'Новость',
-        #         'preview': 'Описание к новости',
-        #         'date': '2022-07-04'
-        #     }, {
-        #         'title': 'Новость',
-        #         'preview': 'Описание к новости',
-        #         'date': '2022-07-04'
-        #     }
-        # ]
+        context['object_list'] = News.objects.all()[:5]
+        return context
+
+
+class NewsDetailView(TemplateView):
+    template_name = "mainapp/news_detail.html"
+
+    def get_context_data(self, pk=None, **kwargs):
+        context = super().get_context_data(pk=pk, **kwargs)
+        context['news_object'] = get_object_or_404(News, pk=pk)
         return context
 
 
