@@ -1,0 +1,88 @@
+from django.contrib.auth.views import LoginView, LogoutView
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from django.utils.safestring import mark_safe
+from django.views.generic import TemplateView
+from django.contrib import messages
+from authapp.models import CustomUser
+
+
+class CustomLoginView(LoginView):
+    template_name = 'authapp/login.html'
+    extra_context = {
+        'title': 'Вход пользователя'
+    }
+
+
+class RegisterView(TemplateView):
+    template_name = 'authapp/register.html'
+    extra_context = {
+        'title': 'Регистрация пользователя'
+    }
+
+    def post(self, request, *args, **kwargs):
+        try:
+            if all(
+                    (
+                        request.POST.get('username'),
+                        request.POST.get('email'),
+                        request.POST.get('password1'),
+                        request.POST.get('password2'),
+                        request.POST.get('first_name'),
+                        request.POST.get('last_name'),
+                        request.POST.get('password1') == request.POST.get('password2')
+                    )
+            ):
+                new_user = CustomUser.objects.create(
+                    username=request.POST.get('username'),
+                    email=request.POST.get('email'),
+                    first_name=request.POST.get('first_name'),
+                    last_name=request.POST.get('last_name'),
+                    age=request.POST.get('age') if request.POST.get("age") else 0,
+                    avatar=request.FILES.get('avatar')
+                )
+                new_user.set_password(request.POST.get('password1'))
+                new_user.save()
+                messages.add_message(request, messages.INFO, 'Регистрация прошла успешно')
+                return HttpResponseRedirect(reverse("authapp:login"))
+        except Exception as ex:
+            messages.add_message(
+                request,
+                messages.WARNING,
+                mark_safe(f'Что-то пошло не так:{ex}'),
+            )
+            return HttpResponseRedirect(reverse("authapp:register"))
+
+
+class CustomLogoutView(LogoutView):
+    pass
+
+
+class EditView(TemplateView):
+    template_name = 'authapp/edit.html'
+    extra_context = {
+        'title': 'Регистрация пользователя'
+    }
+
+    def post(self, request, *args, **kwargs):
+        try:
+            if request.POST.get('username'):
+                request.user.username = request.POST.get('username')
+            if request.POST.get('email'):
+                request.user.email = request.POST.get('email')
+            if request.POST.get('first_name'):
+                request.user.first_name = request.POST.get('first_name')
+            if request.POST.get('last_name'):
+                request.user.username = request.POST.get('last_name')
+            if request.POST.get('age'):
+                request.user.age = request.POST.get('age')
+
+            request.user.save()
+            messages.add_message(request, messages.INFO, 'Сохранено')
+        except Exception as ex:
+            messages.add_message(
+                request,
+                messages.WARNING,
+                mark_safe(f'Что-то пошло не так:{ex}'),
+            )
+        return HttpResponseRedirect(reverse("authapp:edit"))
